@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 
-struct realthread_t : public thread_t<realthread_t>
+struct realthread_t : public unithread::thread_t<realthread_t>
 {
-	realthread_t(launcher_t *launcher, int n) :
+	realthread_t(unithread::launcher_t *launcher, int n) :
 		thread_t<realthread_t>(launcher),
 		d_n(n), d_alive(true)
 	{
@@ -44,7 +44,7 @@ protected:
 
 int main(int argc, char *argv[])
 {
-	launcher_t launcher;
+	unithread::launcher_t launcher;
 
 	realthread_t t1(&launcher, 0);
 	realthread_t t2(&launcher, 4);

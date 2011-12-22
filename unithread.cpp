@@ -5,7 +5,9 @@
 #include <string.h>
 #include <assert.h>
 
-void unix_die(const std::string &during)
+using namespace unithread;
+
+static void unix_die(const std::string &during)
 {
 	int e = errno;
 	throw std::runtime_error("exception during " + during + ", " + strerror(e));

@@ -7,6 +7,9 @@
 
 //#include <valgrind/valgrind.h> // uncomment this to save 4 bytes per thread
 
+namespace unithread
+{
+
 struct launcher_t;
 
 // common functionality for all threads. do not instantiate, use thread_t instead
@@ -84,5 +87,6 @@ thread_t<T>::thread_t(launcher_t *launcher, bool start_runnable, int stacksize) 
 	if (0) thread_start_point<T>(nullptr); // need this code to make the compiler instantiate thread_start_point
 }
 
+} // namespace unithread
 
 #endif // __SWAPCONTEXT3_H__
