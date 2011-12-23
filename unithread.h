@@ -19,6 +19,7 @@ namespace unithread
 {
 
 struct launcher_t;
+struct condition_t;
 
 // common functionality for all threads. do not instantiate, use thread_t instead
 typedef void (*threadstartfunc)(void);
@@ -28,6 +29,7 @@ struct thread_base_t
 	~thread_base_t();
 
 	void yield(bool remain_runnable = true);
+	void yield(condition_t &cond); // yield until condition is set
 
 protected:
 	launcher_t *d_launcher;
@@ -87,6 +89,22 @@ struct launcher_t : public simple_threadmanagement_t
 protected:
 	thread_base_t *d_active; // currently executing thread
 	ucontext_t d_returnpoint;
+};
+
+
+// if a thread is blocked until a certain situation changes, create
+// a condition and yield on it. execution will resume after someone calls set()
+// multiple thread's can wait on the same condition
+struct condition_t
+{
+	condition_t(launcher_t *launcher);
+
+	void set(); // the waiting threads can continue now
+
+	void add_thread(thread_base_t *t) { d_threads.push_back(t); }
+protected:
+	launcher_t *d_launcher;
+	std::list<thread_base_t *> d_threads;
 };
 
 

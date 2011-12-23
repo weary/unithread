@@ -21,6 +21,7 @@ thread_base_t::thread_base_t(
 #ifdef VALGRIND_STACK_REGISTER
 	d_valgrind_stack_id = VALGRIND_STACK_REGISTER(d_stack, d_stack+stacksize);
 #endif
+	assert(d_launcher);
 
 	if (getcontext(&d_context) != 0)
 		unix_die("getting context for new thread");
@@ -47,6 +48,12 @@ thread_base_t::~thread_base_t()
 void thread_base_t::yield(bool remain_runnable)
 {
 	d_launcher->yield(remain_runnable);
+}
+
+void thread_base_t::yield(condition_t &cond)
+{
+	cond.add_thread(d_launcher->active_thread());
+	yield(false);
 }
 
 void thread_base_t::activate(thread_base_t *oldthread)
@@ -110,5 +117,20 @@ void launcher_t::start()
 	d_active = get_runnable_thread();
 	if (d_active)
 		d_active->activate(nullptr);
+}
+
+condition_t::condition_t(launcher_t *launcher) : d_launcher(launcher)
+{
+	assert(d_launcher);
+}
+
+void condition_t::set()
+{
+	for(thread_base_t *t: d_threads)
+	{
+		if (t != d_launcher->active_thread())
+			d_launcher->add_runnable_thread(t);
+	}
+	d_threads.clear();
 }
 
