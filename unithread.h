@@ -5,7 +5,15 @@
 #include <array>
 #include <list>
 
-//#include <valgrind/valgrind.h> // uncomment this to save 4 bytes per thread
+//#include <valgrind/valgrind.h> // uncomment this if you want to use valgrind
+
+
+/** basic usage:
+	derive a class from thread_t, implementing 'run' and 'died' function
+	create a launcher_t
+	create an instance of your thread
+	call launcher_t::run
+*/
 
 namespace unithread
 {
@@ -35,6 +43,7 @@ private:
 	void activate(thread_base_t *oldthread);
 };
 
+// the class to derive from. CRTP, the template argument is your class (ie class myclass : public thread_t<myclass> )
 template<typename T>
 struct thread_t : public thread_base_t
 {
@@ -47,6 +56,8 @@ struct thread_t : public thread_base_t
 struct simple_threadmanagement_t
 {
  	// called when a thread is created (with start_runnable=true) or a thread yields
+	// call explicitly after you used yield(remain_runnable=false)
+	// calling this function multiple times is valid. don't call it with the active thread
 	void add_runnable_thread(thread_base_t *t);
 
 	bool have_inactive_threads() const { return !d_canrun.empty(); }
@@ -60,6 +71,8 @@ private:
 	std::list<thread_base_t *> d_canrun;
 };
 
+
+// the thread management
 struct launcher_t : public simple_threadmanagement_t
 {
 	launcher_t() : d_active(nullptr) {}

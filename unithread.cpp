@@ -65,6 +65,9 @@ void thread_base_t::activate(thread_base_t *oldthread)
 
 void simple_threadmanagement_t::add_runnable_thread(thread_base_t *t)
 {
+	if (std::find(d_canrun.begin(), d_canrun.end(), t) != d_canrun.end())
+		return;
+
 	d_canrun.push_back(t);
 }
 
@@ -80,7 +83,7 @@ thread_base_t *simple_threadmanagement_t::get_runnable_thread()
 void launcher_t::yield(bool remain_runnable)
 {
 	thread_base_t *next = get_runnable_thread();
-	if (!next) // we are the only thread -> don't yield
+	if (!next && remain_runnable) // we are the only thread -> don't yield
 		return;
 
 	assert(d_active);
