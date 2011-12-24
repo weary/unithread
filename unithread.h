@@ -37,10 +37,8 @@ struct thread_base_t
 	// ie, thread is waiting for time, or currently active
 	bool scheduled() const { return d_scheduled; }
 
-protected:
-	launcher_t *d_launcher;
-
 private:
+	launcher_t *d_launcher;
 	bool d_scheduled;
 	ucontext_t d_context;
 	char *d_stack;

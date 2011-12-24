@@ -20,7 +20,7 @@ struct realthread_t : public unithread::thread_t<realthread_t>
 		if ((d_n & 3) == 0)
 		{
 			printf("thread %d creating subthread\n", d_n);
-			t = new realthread_t(d_launcher, d_n+1, NULL);
+			t = new realthread_t(launcher(), d_n+1, NULL);
 			while (t->alive()) // busy-loop until other thread is gone
 			{
 				printf("thread %d's subthread %d is still alive, yielding\n", d_n, d_n+1);
@@ -30,8 +30,8 @@ struct realthread_t : public unithread::thread_t<realthread_t>
 		else if ((d_n & 3) < 3)
 		{
 			printf("thread %d creating subthread with condition\n", d_n);
-			unithread::condition_t cond(d_launcher);
-			t = new realthread_t(d_launcher, d_n+1, &cond);
+			unithread::condition_t cond(launcher());
+			t = new realthread_t(launcher(), d_n+1, &cond);
 			yield(cond);
 		}
 		else // d_n & 3 == 3
