@@ -1,6 +1,7 @@
 #include "unithread.h"
 #include <stdio.h>
 #include <assert.h>
+#include <stdint.h>
 
 
 struct realthread_t : public unithread::thread_t<realthread_t>
@@ -15,7 +16,7 @@ struct realthread_t : public unithread::thread_t<realthread_t>
 	void run()
 	{
 		printf("running thread %d\n", d_n);
-		realthread_t *t;
+		realthread_t *t = nullptr;
 		if ((d_n & 3) == 0)
 		{
 			printf("thread %d creating subthread\n", d_n);
@@ -33,8 +34,10 @@ struct realthread_t : public unithread::thread_t<realthread_t>
 			t = new realthread_t(d_launcher, d_n+1, &cond);
 			yield(cond);
 		}
-		delete t;
+		else // d_n & 3 == 3
+		{}
 		printf("after yield back in thread %d\n", d_n);
+		if (t) { delete t; t = nullptr; }
 	}
 
 	bool alive() const { return d_alive; }

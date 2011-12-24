@@ -28,21 +28,29 @@ struct thread_base_t
 	thread_base_t(launcher_t *launcher, threadstartfunc func, bool start_runnable, int stacksize);
 	~thread_base_t();
 
+	launcher_t *launcher() { return d_launcher; }
+
 	void yield(bool remain_runnable = true);
 	void yield(condition_t &cond); // yield until condition is set
+
+	// returns true if the thread will, at some point, run if left unattended
+	// ie, thread is waiting for time, or currently active
+	bool scheduled() const { return d_scheduled; }
 
 protected:
 	launcher_t *d_launcher;
 
 private:
+	bool d_scheduled;
 	ucontext_t d_context;
 	char *d_stack;
 #ifdef VALGRIND_STACK_REGISTER
 	unsigned d_valgrind_stack_id;
 #endif
 
-	friend class launcher_t; // to call activate
+	friend class launcher_t; // to call activate and set_scheduled
 	void activate(thread_base_t *oldthread);
+	void set_scheduled() { d_scheduled = true; }
 };
 
 // the class to derive from. CRTP, the template argument is your class (ie class myclass : public thread_t<myclass> )
@@ -67,7 +75,7 @@ struct simple_threadmanagement_t
 protected:
 	// called from launcher if current thread yields or dies
 	// returns nullptr if no thread is ready to run
-	thread_base_t *get_runnable_thread();
+	thread_base_t *pop_runnable_thread();
 
 private:
 	std::list<thread_base_t *> d_canrun;
@@ -81,11 +89,12 @@ struct launcher_t : public simple_threadmanagement_t
 
 	void start();
 
-	void yield(bool remain_runnable);
+	void yield(); // thread never remains running, add to queue before calling
 	thread_base_t *active_thread() const { return d_active; }
 
 	ucontext_t *returnpoint() { return &d_returnpoint; }
 
+	void add_runnable_thread(thread_base_t *t);
 protected:
 	thread_base_t *d_active; // currently executing thread
 	ucontext_t d_returnpoint;
