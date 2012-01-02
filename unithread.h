@@ -92,8 +92,11 @@ struct launcher_t : public simple_threadmanagement_t
 
 	ucontext_t *returnpoint() { return &d_returnpoint; }
 
-	void add_runnable_thread(thread_base_t *t);
 protected:
+	friend class thread_base_t;
+	friend class condition_t;
+	void add_runnable_thread(thread_base_t *t);
+
 	thread_base_t *d_active; // currently executing thread
 	ucontext_t d_returnpoint;
 };

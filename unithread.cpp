@@ -52,10 +52,9 @@ void thread_base_t::yield(bool remain_runnable)
 	if (d_launcher->active_thread() != this)
 		throw std::runtime_error("called yield on non-active thread");
 
+	d_scheduled = false;
 	if (remain_runnable)
 		d_launcher->add_runnable_thread(this);
-	else
-		d_scheduled = false;
 
 	d_launcher->yield();
 }
@@ -106,6 +105,8 @@ void launcher_t::yield()
 	thread_base_t *next = pop_runnable_thread();
 	if (next == d_active) // we are the only thread -> don't yield
 		return;
+	if (!next)
+		throw std::runtime_error("no next available thread, cannot yield!");
 
 	assert(d_active);
 	thread_base_t *old = d_active;
