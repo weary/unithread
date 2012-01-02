@@ -1,7 +1,13 @@
 /CMakeFiles
 /CMakeCache.txt
-.*.swp
 /Makefile
 /cmake_install.cmake
+/sample/CMakeFiles
+/sample/CMakeCache.txt
+/sample/Makefile
+/sample/asiobuilddir
+/sample/cmake_install.cmake
+.*.swp
 /libunithread.a
 /unithread_test
+/sample/asiosample
