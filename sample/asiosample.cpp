@@ -144,10 +144,10 @@ private:
 	unithread::launcher_t *d_launcher;
 };
 
-struct some_thread_t : public unithread::thread_t<some_thread_t>
+struct some_thread_t : public unithread::thread_t
 {
 	some_thread_t(unithread::launcher_t *launcher, int tid, session *ses) :
-		unithread::thread_t<some_thread_t>(launcher, true, 8192),
+		unithread::thread_t(launcher, true, 8192),
 		d_threadid(tid),
 		d_session(ses)
 	{}
@@ -160,12 +160,9 @@ struct some_thread_t : public unithread::thread_t<some_thread_t>
 		d_session->write("echo from thread " + to_str(d_threadid) + ": '" + line + "'\n");
 	}
 
-	void died(bool e)
+	void died()
 	{
-		if (e)
-			printf("some thread died from exception\n");
-		else
-			printf("some thread died normally\n");
+		printf("some thread died\n");
 		delete this;
 	}
 
@@ -173,9 +170,10 @@ struct some_thread_t : public unithread::thread_t<some_thread_t>
 	session *d_session;
 };
 
-struct main_thread_t : public unithread::thread_t<main_thread_t>
+struct main_thread_t : public unithread::thread_t
 {
-	main_thread_t(unithread::launcher_t *launcher) : unithread::thread_t<main_thread_t>(launcher, true, 8192)
+	main_thread_t(unithread::launcher_t *launcher) :
+		unithread::thread_t(launcher, true, 8192)
 	{}
 
 	void run()
@@ -194,7 +192,7 @@ struct main_thread_t : public unithread::thread_t<main_thread_t>
 		}
 	}
 
-	void died(bool fromexception)
+	void died()
 	{
 		printf("main thread died\n");
 	}

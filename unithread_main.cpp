@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 
-struct realthread_t : public unithread::thread_t<realthread_t>
+struct realthread_t : public unithread::thread_t
 {
 	realthread_t(unithread::launcher_t *launcher, int n, unithread::condition_t *cond) :
-		thread_t<realthread_t>(launcher),
+		thread_t(launcher),
 		d_n(n), d_alive(true), d_cond(cond)
 	{
 		printf("thread %d created\n", d_n);
@@ -42,10 +42,10 @@ struct realthread_t : public unithread::thread_t<realthread_t>
 
 	bool alive() const { return d_alive; }
 
-	void died(bool from_exception)
+	void died()
 	{
 		d_alive = false;
-		printf("thread %d died (from_exception=%d)\n", d_n, from_exception);
+		printf("thread %d died\n", d_n);
 		if (d_cond) d_cond->set();
 	}
 
