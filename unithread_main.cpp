@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 
+unithread::condition_t d_crit_sec;
 struct realthread_t : public unithread::thread_t
 {
 	realthread_t(unithread::launcher_t *launcher, int n, unithread::condition_t *cond) :
@@ -15,6 +16,12 @@ struct realthread_t : public unithread::thread_t
 
 	void run()
 	{
+		unithread::critical_section_guard_t cs_guard(launcher(), d_crit_sec);
+		yield();
+		yield();
+		yield();
+		cs_guard.exit();
+
 		printf("running thread %d\n", d_n);
 		realthread_t *t = nullptr;
 		if ((d_n & 3) == 0)
@@ -30,7 +37,7 @@ struct realthread_t : public unithread::thread_t
 		else if ((d_n & 3) < 3)
 		{
 			printf("thread %d creating subthread with condition\n", d_n);
-			unithread::condition_t cond(launcher());
+			unithread::condition_t cond;
 			t = new realthread_t(launcher(), d_n+1, &cond);
 			yield(cond);
 		}
@@ -46,7 +53,7 @@ struct realthread_t : public unithread::thread_t
 	{
 		d_alive = false;
 		printf("thread %d died\n", d_n);
-		if (d_cond) d_cond->set();
+		if (d_cond) d_cond->set(launcher());
 	}
 
 protected:

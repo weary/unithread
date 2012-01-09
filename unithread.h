@@ -115,16 +115,34 @@ protected:
 // multiple thread's can wait on the same condition
 struct condition_t
 {
-	condition_t(launcher_t *launcher);
+	void set(launcher_t *launcher); // the waiting threads can continue now
+	void clear();
 
-	void set(); // the waiting threads can continue now
-
-	void add_thread(thread_t *t) { d_threads.push_back(t); }
+	void add_thread(thread_t *t);
+	void del_thread(thread_t *t);
+	bool empty() const { return d_threads.empty(); }
 protected:
-	launcher_t *d_launcher;
 	std::list<thread_t *> d_threads;
 };
 
+// make sure only one thread can execute while this object exists
+struct critical_section_guard_t
+{
+	critical_section_guard_t(launcher_t *launcher, condition_t &cond);
+	~critical_section_guard_t();
+
+	void enter();
+	void exit();
+
+	// don't copy
+	critical_section_guard_t & operator=(const critical_section_guard_t&) = delete;
+	critical_section_guard_t(const critical_section_guard_t&) = delete;
+
+protected:
+	bool d_active; // true if we are between 'enter' and 'exit' calls
+	launcher_t *d_launcher;
+	condition_t *d_condition;
+};
 
 } // namespace unithread
 

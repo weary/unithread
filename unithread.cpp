@@ -159,15 +159,62 @@ void launcher_t::start()
 		d_active->activate(nullptr);
 }
 
-condition_t::condition_t(launcher_t *launcher) : d_launcher(launcher)
-{
-	assert(d_launcher);
-}
-
-void condition_t::set()
+void condition_t::set(launcher_t *launcher)
 {
 	for(thread_t *t: d_threads)
-		d_launcher->add_runnable_thread(t);
+		launcher->add_runnable_thread(t);
+}
+
+void condition_t::clear()
+{
 	d_threads.clear();
+}
+
+void condition_t::add_thread(thread_t *t)
+{
+	auto iter = std::find(d_threads.cbegin(), d_threads.cend(), t);
+	if (iter == d_threads.cend())
+		d_threads.push_back(t);
+}
+
+void condition_t::del_thread(thread_t *t)
+{
+	auto iter = std::find(d_threads.begin(), d_threads.end(), t);
+	if (iter != d_threads.cend())
+		d_threads.erase(iter);
+}
+
+critical_section_guard_t::critical_section_guard_t(launcher_t *launcher, condition_t &cond) : // condition should be shared amongst all competing threads
+	d_active(false), d_launcher(launcher), d_condition(&cond)
+{
+	enter();
+}
+
+critical_section_guard_t::~critical_section_guard_t()
+{
+	if (d_active)
+		exit();
+}
+
+void critical_section_guard_t::enter()
+{
+	assert(!d_active);
+	while (!d_condition->empty()) // are we the first
+	{
+		d_condition->add_thread(d_launcher->active_thread());
+		d_launcher->yield();
+		// if we woke, someone left the critical section (and cleared it)
+	}
+	d_condition->add_thread(nullptr); // add dummy to signal condition is busy
+	d_active = true;
+}
+
+void critical_section_guard_t::exit()
+{
+	assert(d_active);
+	d_condition->del_thread(nullptr); // remove dummy
+	d_condition->set(d_launcher);
+	d_condition->clear();
+	d_active = false;
 }
 
