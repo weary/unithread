@@ -140,7 +140,7 @@ void launcher_t::add_runnable_thread(thread_t *t)
 
 void launcher_t::start()
 {
-	bool returnpoint_initialised = false;
+	volatile bool returnpoint_initialised = false;
 	if (getcontext(&d_returnpoint) != 0)
 		unix_die("getting returnpoint context");
 	if (returnpoint_initialised)
