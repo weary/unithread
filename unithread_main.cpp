@@ -3,9 +3,14 @@
 #include <assert.h>
 #include <stdint.h>
 
+struct frutsel_t
+{
+	unsigned long aap;
+};
 
 unithread::condition_t d_crit_sec;
-struct realthread_t : public unithread::thread_t
+
+struct realthread_t : public frutsel_t, public unithread::thread_t
 {
 	realthread_t(unithread::launcher_t *launcher, int n, unithread::condition_t *cond) :
 		thread_t(launcher),
