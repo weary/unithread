@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 2.8)
 project (unithread_sample)
 
-add_subdirectory(.. asiobuilddir) # hmm..
-
 find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(${Boost_INCLUDE_DIRS})

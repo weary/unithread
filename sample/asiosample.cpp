@@ -24,7 +24,7 @@ public:
 
 	void readline(std::string &s)
 	{
-		unithread::condition_t cond(d_launcher);
+		unithread::condition_t cond;
 		d_threads.push_back(value_t(&cond, s));
 		d_launcher->active_thread()->yield(cond);
 		// by the time we return our string will be set
@@ -60,7 +60,7 @@ private:
 				return;
 			}
 			d_threads.front().second = line;
-			d_threads.front().first->set();
+			d_threads.front().first->set(d_launcher);
 			d_threads.pop_front();
 		}
 		schedule_read();
